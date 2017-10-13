@@ -1,0 +1,13 @@
+{
+  "requirements": {
+    "python": "3.1.4"
+  },
+  "commands": [
+    {
+      "name": "alb",
+      "aliases": ["alb"],
+      "version": "0.1.0",
+      "description": "Manage and view your application load balancing configuration"
+    }
+  ]
+}
