@@ -249,6 +249,12 @@ def create_sub_command(
         help="DEBUG mode to generate additional logs for troubleshooting",
         action="store_true")
 
+    optional.add_argument(
+        "--show_origin_policy",
+        help="Instead of showing cloudlet policy, show the origin policy",
+        action="store_true"
+    )
+
     return action
 
 
@@ -322,7 +328,6 @@ def setup(args):
         for every_policy_name in policies_list:
             root_logger.info(every_policy_name)
 
-
     root_logger.info("Processing the ALB Origins..")
     #do stuff
     origins_response = cloudlet_object.list_origins(session)
@@ -333,17 +338,14 @@ def setup(args):
             shutil.rmtree('origins')
         if not os.path.exists(origin_path):
             os.makedirs(origin_path)
-        with open(os.path.join(os.path.expanduser(origin_path), 'origins.json'), 'w') as origins_file:
-            origins_response_json = origins_response.json()
-            # Find number of groups using len function
-            total_origins = len(origins_response_json)
-            origins_output = []
-            for every_origin in origins_response_json:
-                origin_info = {'originId': every_origin['originId'], 'description': every_origin['description']}
-                origins_output.append(origin_info)
-            origins_file.write(json.dumps(origins_output, indent=4))
+
+        origins_response_json = origins_response.json()
+        # Find number of groups using len function
+        for every_origin in origins_response_json:
+            origin_info = {'originId': every_origin['originId'], 'description': every_origin['description']}
+            with open(os.path.join(os.path.expanduser(origin_path), origin_info['originId']+'.json'),'w') as origins_file:
+                origins_file.write(json.dumps(origin_info, indent=4))
     root_logger.info("SUCCESS: Setup is now complete!")
-    total_origins = str( len(origins_output) )
     return 0
 
 
@@ -354,7 +356,15 @@ def show(args):
     version = args.version
     verbose = args.verbose
     from_version = args.from_version
+    # new parameter to switch to origin policy
+    show_origin_policy = args.show_origin_policy
 
+    if show_origin_policy == True:
+        show_origin_details(base_url, session, policy, version, verbose, from_version)
+    else:
+        show_policy_details(base_url, session, policy, version, verbose, from_version)
+
+def show_policy_details(base_url, session, policy, version, verbose, from_version):
     cloudlet_object = Cloudlet(base_url)
     policies_folder = os.path.join(get_cache_dir(), 'policies')
     for root, dirs, files in os.walk(policies_folder):
@@ -365,9 +375,11 @@ def show(args):
             policy_json_content = json.loads(policy_string_content)
             policy_policy_id = policy_json_content['policyId']
             root_logger.info('Fetching policy details...')
+
+            ## If we are looking at a specific version
             if version:
                 policy_detail = cloudlet_object.get_cloudlet_policy(
-                    session, policy_policy_id, version=args.version)
+                    session, policy_policy_id, version)
                 root_logger.debug(json.dumps(policy_detail.json()))
                 every_version_detail = policy_detail.json()
                 if policy_detail.status_code == 200:
@@ -441,6 +453,7 @@ def show(args):
                             root_logger.info('\nThere are no match criteria for this rule\n')
                 else:
                     root_logger.info('Requested policy version does not exist - please check version number')
+            ## no version number was used - so just display the overall summary
             else:
                 policy_details = cloudlet_object.get_cloudlet_policy(
                     session, policy_policy_id)
@@ -493,6 +506,27 @@ def show(args):
             root_logger.info(
                 '\nLocal datastore does not have this policy. Please double check policy name or run "setup" first')
             exit(1)
+
+
+def show_origin_details(base_url, session, policy, version, verbose, from_version):
+    """
+
+    :param policy:
+    :param version:
+    :param verbose:
+    :param from_version:
+    :return:
+    """
+
+    # get_cloudlet_origin_versions
+
+    cloudlet_object = Cloudlet(base_url)
+    policies_folder = os.path.join(get_cache_dir(), 'origins')
+    policies_file = os.path.join(policies_folder,'origins.json')
+    if os.path.isfile(policies_file) == True:
+        with open(policies_file) as policy_file_handler:
+            pass
+
 
 
 def download(args):
