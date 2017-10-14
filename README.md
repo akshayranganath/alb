@@ -1,6 +1,8 @@
 # Application Load Balancer (ALB) Management
 Provides a way to interact real-time with your Visitor Prioritization Cloudlet via Open APIs and without manually having to go into the Luna Portal. Provides various functionality such as viewing current policies, current status, rule details, and the ability to invoke actual percentage changes.
 
+<strong><span style="color:red">This code is currently work in progress. This section will show the completed parts of the code:<br />Code is now able to pull down all the ALB policies.</span></strong>
+
 ## Local Install
 * Python 3+
 * pip install edgegrid-python
