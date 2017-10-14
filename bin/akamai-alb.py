@@ -258,6 +258,7 @@ def setup(args):
     root_logger.info('Setting up required files... please wait')
     # Create the wrapper object to make calls
     cloudlet_object = Cloudlet(base_url)
+    '''
     group_response = cloudlet_object.list_cloudlet_groups(session)
     root_logger.info('Processing groups...')
     if group_response.status_code == 200:
@@ -320,6 +321,31 @@ def setup(args):
             " folder:")
         for every_policy_name in policies_list:
             root_logger.info(every_policy_name)
+        '''
+
+    root_logger.info("Now fetching the ALB Origin details..")
+    #do stuff
+    origins_response = cloudlet_object.list_origins(session)
+    if origins_response.status_code == 200:
+        origin_path = 'origins'
+        # Delete the groups folder before we start
+        if os.path.exists('origins'):
+            shutil.rmtree('origins')
+        if not os.path.exists(origin_path):
+            os.makedirs(origin_path)
+        with open(os.path.join(origin_path, 'origins.json'), 'w') as origins_file:
+            origins_response_json = origins_response.json()
+            # Find number of groups using len function
+            total_origins = len(origins_response_json)
+            origins_output = []
+            for every_origin in origins_response_json:
+                origin_info = {'originId': every_origin['originId'], 'description': every_origin['description']}
+                origins_output.append(origin_info)
+            origins_file.write(json.dumps(origins_output, indent=4))
+
+    #now loop through each origin id and pull the origin policy information
+    for each_origin in origins_output:
+
 
     return 0
 

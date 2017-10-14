@@ -287,7 +287,7 @@ class Cloudlet(object):
             cloudlet_policy_delete_url)
         return cloudlet_policy_delete_response
 
-    def get_all_origin_ids(self, session):
+    def list_origins(self, session):
         """
         Function to fetch all the ALB cloudlets
 
@@ -298,7 +298,7 @@ class Cloudlet(object):
             (cloudlet_origin_response) Object with all details
 
         """
-        cloudlet_origin_url = 'https://' + self.access_hostname + '/cloudlets/api/v2/origins??type=APPLICATION_LOAD_BALANCER'
+        cloudlet_origin_url = 'https://' + self.access_hostname + '/cloudlets/api/v2/origins?type=APPLICATION_LOAD_BALANCER'
         cloudlet_origin_response = session.get(cloudlet_origin_url)
         return cloudlet_origin_response
 
