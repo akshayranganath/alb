@@ -37,7 +37,6 @@ class Cloudlet(object):
         cloudlet_group_response = session.get(cloudlet_group_url)
         return cloudlet_group_response
 
-
     def get_all_group_ids(self, session):
         """
         Function to fetch all groupIDs only
@@ -119,9 +118,10 @@ class Cloudlet(object):
             policies_url = 'https://' + self.access_hostname + \
                            '/cloudlets/api/v2/policies?gid=' + str(group_id) + '&cloudletId=' + str(cloudlet_id)
             policies_response = session.get(policies_url)
-        elif cloudlet_code == 'VP':
+        elif cloudlet_code == 'ALB':
+            # ALB has a cloudletId value of 9
             policies_url = 'https://' + self.access_hostname + \
-                           '/cloudlets/api/v2/policies?gid=' + str(group_id) + '&cloudletId=' + str(1)
+                           '/cloudlets/api/v2/policies?gid=' + str(group_id) + '&cloudletId=' + str(9)
             policies_response = session.get(policies_url)
         return policies_response
 
@@ -165,7 +165,7 @@ class Cloudlet(object):
         if page_size == 'optional':
             cloudlet_policy_versions_url = 'https://' + self.access_hostname + \
                                            '/cloudlets/api/v2/policies/' + str(
-                                               policy_id) + '/versions?includeRules=true'
+                policy_id) + '/versions?includeRules=true'
         else:
             cloudlet_policy_versions_url = 'https://' + self.access_hostname + '/cloudlets/api/v2/policies/' + \
                                            str(policy_id) + '/versions?includeRules=true&pageSize=' + page_size
@@ -196,10 +196,12 @@ class Cloudlet(object):
         }
         if clone_version == 'optional':
             cloudlet_policy_create_url = 'https://' + self.access_hostname + \
-                '/cloudlets/api/v2/policies/' + str(policy_id) + '/versions' + '?includeRules=true'
+                                         '/cloudlets/api/v2/policies/' + str(
+                policy_id) + '/versions' + '?includeRules=true'
         else:
             cloudlet_policy_create_url = 'https://' + self.access_hostname + '/cloudlets/api/v2/policies/' + \
-                str(policy_id) + '/versions' + '?includeRules=true&cloneVersion=' + clone_version
+                                         str(
+                                             policy_id) + '/versions' + '?includeRules=true&cloneVersion=' + clone_version
         cloudlet_policy_create_response = session.post(
             cloudlet_policy_create_url, headers=headers)
         return cloudlet_policy_create_response
@@ -258,7 +260,8 @@ class Cloudlet(object):
             "network" : "%s"
         }""" % network
         cloudlet_policy_activate_url = 'https://' + self.access_hostname + \
-            '/cloudlets/api/v2/policies/' + str(policy_id) + '/versions/' + str(version) + '/activations'
+                                       '/cloudlets/api/v2/policies/' + str(policy_id) + '/versions/' + str(
+            version) + '/activations'
         cloudlet_policy_activate_response = session.post(
             cloudlet_policy_activate_url, data=network_data, headers=headers)
         return cloudlet_policy_activate_response
@@ -300,17 +303,17 @@ class Cloudlet(object):
         return cloudlet_origin_response
 
     def get_cloudlet_origin_versions(self, session, origin_id):
-       """
+        """
 
-       :param session: Object
-            An EdgeGrid Auth akamai session object
-       :param origin_id: String
-            The origin id for the Cloudlet policies
+        :param session: Object
+             An EdgeGrid Auth akamai session object
+        :param origin_id: String
+             The origin id for the Cloudlet policies
 
-       :return: cloudlet_origin_response : Object
-            (cloudlet_origin_response) Object with all details
-       """
-       cloudlet_policy_url = 'https://' + self.access_hostname + '/cloudlets/api/v2/origins/' + \
-                                  str(origin_id) + '/versions/'
+        :return: cloudlet_origin_response : Object
+             (cloudlet_origin_response) Object with all details
+        """
+        cloudlet_policy_url = 'https://' + self.access_hostname + '/cloudlets/api/v2/origins/' + \
+                              str(origin_id) + '/versions/'
         cloudlet_policy_response = session.get(cloudlet_policy_url)
         return cloudlet_policy_response

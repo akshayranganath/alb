@@ -35,7 +35,7 @@ PACKAGE_VERSION = "0.1.0"
 # Setup logging
 if not os.path.exists('logs'):
     os.makedirs('logs')
-log_file = os.path.join('logs', 'visitor-prioritization.log')
+log_file = os.path.join('logs', 'alb.log')
 
 # Set the format of logging in console and file separately
 log_formatter = logging.Formatter(
@@ -52,6 +52,7 @@ console_handler.setFormatter(console_formatter)
 root_logger.addHandler(console_handler)
 # Set Log Level to DEBUG, INFO, WARNING, ERROR, CRITICAL
 root_logger.setLevel(logging.INFO)
+
 
 
 def init_config(edgerc_file, section):
@@ -95,7 +96,7 @@ def cli():
         prog += " [command]"
 
     parser = argparse.ArgumentParser(
-        description='Akamai CLI for Visitor Prioritization',
+        description='Akamai CLI for Application Load Balancer (ALB)',
         add_help=False,
         prog=prog)
     parser.add_argument(
@@ -284,7 +285,7 @@ def setup(args):
         if not os.path.exists(policy_path):
             os.makedirs(policy_path)
         root_logger.info('Total groups found: ' + str(total_groups))
-        root_logger.info('Fetching VP cloudlet policies under each group..')
+        root_logger.info('Fetching ALB cloudlet policies under each group..')
         counter = 1
         for every_group in group_response.json():
             group_id = every_group['groupId']
@@ -293,7 +294,7 @@ def setup(args):
                              ' groups, groupId and name is: ' + str(group_id) + ': ' + group_name)
             counter += 1
             cloudlet_policies = cloudlet_object.list_policies(
-                session=session, group_id=group_id, cloudlet_code='VP')
+                session=session, group_id=group_id, cloudlet_code='ALB')
             if cloudlet_policies.status_code == 200:
                 for every_policy in cloudlet_policies.json():
                     policy_name = every_policy['name'] + '.json'
@@ -356,6 +357,7 @@ def show(args):
                             '\n')
                         # Need to check for match rules, sometimes we see null
                         # values
+                        print (json.dumps(every_version_detail, indent=2))
                         if every_version_detail['matchRules'] is not None:
                             if not verbose:
                                 for every_match_rule in every_version_detail['matchRules']:
