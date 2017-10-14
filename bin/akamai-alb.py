@@ -357,26 +357,32 @@ def show(args):
                             '\n')
                         # Need to check for match rules, sometimes we see null
                         # values
-                        print (json.dumps(every_version_detail, indent=2))
                         if every_version_detail['matchRules'] is not None:
                             if not verbose:
                                 for every_match_rule in every_version_detail['matchRules']:
-                                    # Loop each match condition within each rule
-                                    # Check whether rules is disabled, if yes
-                                    # display accordingly
-                                    if 'disabled' in every_match_rule and every_match_rule['disabled'] is True:
-                                        status = 'DISABLED'
-                                    else:
-                                        status = 'ACTIVE'
-                                    root_logger.info('   ' +
-                                          every_match_rule['name'] +
-                                          ' -> ' +
-                                          str(every_match_rule['passThroughPercent']) +
-                                          ' -> ' +
-                                          status)
-                                root_logger.info(
-                                    '\nNOTE: You can pass --verbose as an additional argument to get detailed rule '
-                                    'information')
+                                    root_logger.info(every_match_rule['name'] + ' -> ')
+                                    for every_match in every_match_rule['matches']:
+                                        # Loop each match condition within each rule
+                                        # Check whether rules is disabled, if yes
+                                        # display accordingly
+                                        if 'disabled' in every_match_rule and every_match_rule['disabled'] is True:
+                                            status = 'DISABLED'
+                                        else:
+                                            status = 'ACTIVE'
+                                        match_operator = ''
+                                        if every_match['negate'] != False:
+                                            match_operator = 'not '
+                                        root_logger.info('   ' +
+                                              every_match['matchType'] +
+                                              ' -> ' +
+                                             match_operator + every_match['matchOperator'] +
+                                              ' -> ' +
+                                              every_match['matchValue'])
+
+                                    root_logger.info(' Origin policy: ' +  every_match_rule['forwardSettings']['originId'] )
+                                    root_logger.info(
+                                        '\nNOTE: You can pass --verbose as an additional argument to get detailed rule '
+                                        'information')
                             if verbose:
                                 root_logger.info(
                                     '     Match Criteria and Rule Details are: ')
