@@ -361,7 +361,8 @@ def show(args):
                             if not verbose:
                                 for every_match_rule in every_version_detail['matchRules']:
                                     root_logger.info(every_match_rule['name'] + ' -> ')
-                                    for every_match in every_match_rule['matches']:
+                                    matches = 0
+                                    for every_match_in_match_rule in every_match_rule['matches']:
                                         # Loop each match condition within each rule
                                         # Check whether rules is disabled, if yes
                                         # display accordingly
@@ -370,50 +371,49 @@ def show(args):
                                         else:
                                             status = 'ACTIVE'
                                         match_operator = ''
-                                        if every_match['negate'] != False:
+                                        if every_match_in_match_rule['negate'] != False:
                                             match_operator = 'not '
+                                        if matches == 1:
+                                            root_logger.info('   AND   ' )
                                         root_logger.info('   ' +
-                                              every_match['matchType'] +
+                                              every_match_in_match_rule['matchType'] +
                                               ' -> ' +
-                                             match_operator + every_match['matchOperator'] +
+                                             match_operator + every_match_in_match_rule['matchOperator'] +
                                               ' -> ' +
-                                              every_match['matchValue'])
+                                              every_match_in_match_rule['matchValue'])
+                                        matches = 1
 
                                     root_logger.info(' Origin policy: ' +  every_match_rule['forwardSettings']['originId'] )
                                     root_logger.info(
                                         '\nNOTE: You can pass --verbose as an additional argument to get detailed rule '
                                         'information')
                             if verbose:
-                                root_logger.info(
-                                    '     Match Criteria and Rule Details are: ')
-                                root_logger.info(
-                                    '\n       ----------------------------------------------       \n')
+                                #TBD: In this case, pull the origin ALB setting information and try to display that
                                 for every_match_rule in every_version_detail['matchRules']:
-                                    multiple_matches = 0
-                                    root_logger.info(
-                                        '       Rule Name: ' + every_match_rule['name'])
-                                    root_logger.info(
-                                        '       Traffic Percentage: ' + str(every_match_rule['passThroughPercent']))
-                                    root_logger.info('')
-                                    # Loop each match conditon within each rule
-                                    for every_match_condition in every_match_rule['matches']:
-                                        if multiple_matches == 1:
-                                            root_logger.info('       AND')
-                                        root_logger.info(
-                                            '       Match Type: ' + every_match_condition['matchType'])
-                                        root_logger.info(
-                                            '       Match Value: ' + every_match_condition['matchValue'])
-                                        multiple_matches = 1
-                                    # Check wthether rules is disabled, if yes
-                                    # display accordingly
-                                    if 'disabled' in every_match_rule and every_match_rule['disabled'] is True:
-                                        root_logger.info(
-                                            '\n       Rule is DISABLED')
-                                    else:
-                                        root_logger.info(
-                                            '\n       Rule is ACTIVE')
-                                    root_logger.info(
-                                        '\n       ----------------------------------------------       \n')
+                                    root_logger.info(every_match_rule['name'] + ' -> ')
+                                    matches = 0
+                                    for every_match_in_match_rule in every_match_rule['matches']:
+                                        # Loop each match condition within each rule
+                                        # Check whether rules is disabled, if yes
+                                        # display accordingly
+                                        if 'disabled' in every_match_rule and every_match_rule['disabled'] is True:
+                                            status = 'DISABLED'
+                                        else:
+                                            status = 'ACTIVE'
+                                        match_operator = ''
+                                        if every_match_in_match_rule['negate'] != False:
+                                            match_operator = 'not '
+                                        if matches == 1:
+                                            root_logger.info('   AND   ' )
+                                        root_logger.info('   ' +
+                                              every_match_in_match_rule['matchType'] +
+                                              ' -> ' +
+                                             match_operator + every_match_in_match_rule['matchOperator'] +
+                                              ' -> ' +
+                                              every_match_in_match_rule['matchValue'])
+                                        matches = 1
+
+                                    root_logger.info(' Origin policy: ' +  every_match_rule['forwardSettings']['originId'] )
                         else:
                             root_logger.info('\nThere are no match criteria for this rule\n')
                 else:
