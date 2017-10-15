@@ -522,10 +522,96 @@ def show_origin_details(base_url, session, policy, version, verbose, from_versio
 
     cloudlet_object = Cloudlet(base_url)
     policies_folder = os.path.join(get_cache_dir(), 'origins')
-    policies_file = os.path.join(policies_folder,'origins.json')
+    policies_file = os.path.join(policies_folder,policy+'.json')
     if os.path.isfile(policies_file) == True:
-        with open(policies_file) as policy_file_handler:
-            pass
+
+        if version == None:
+            # there is no special information - so we don't need to open the file.
+            origin_policy_detail = cloudlet_object.list_origin_policy_activiations(session,policy)
+            every_version_detail = origin_policy_detail.json()
+            root_logger.info("Fetching policy details...")
+            root_logger.info("")
+
+            root_logger.info("Policy Details:")
+
+            root_logger.info("----------------")
+            root_logger.info("Policy Description: " + policy)
+            some_active_version_present = False
+            for every_activation_detail in every_version_detail:
+                if every_activation_detail['status'] == 'active':
+                    some_active_version_present = True
+                    root_logger.info('Version ' +
+                                     str(every_activation_detail['version']) +
+                                     ' is live in ' +
+                                     str(every_activation_detail['network']) +
+                                     ' . Activated by: ' +
+                                     str(every_activation_detail['activatedBy']) +
+                                     ' at ' +
+                                     str(every_activation_detail['activatedDate']))
+
+            if some_active_version_present == False:
+                root_logger.info('No activations found on STAGING or on PROD.')
+            root_logger.info(
+                '\nNOTE: You can pass --version <version_number> as an additional argument to get version specific '
+                'details\n')
+        else:
+            # version specific information
+            origin_policy_version_detail = cloudlet_object.get_cloudlet_origin_version(session, policy,
+                                                                                       version).json()
+            # chck if an error occured
+            if 'errorCode' in origin_policy_version_detail:
+                root_logger.info( 'Error: ' + str(origin_policy_version_detail['status']) + '\n' +
+                                  origin_policy_version_detail['title'] + '\n' +
+                                  origin_policy_version_detail['errorMessage']
+                                  )
+                exit(1)
+
+            if verbose == False:
+                root_logger.info('Fetching policy details for: ' + policy)
+                root_logger.info('\nDetails of version: ' + str(version))
+                root_logger.info('\tPolicy created by: ' + origin_policy_version_detail['lastModifiedBy'])
+                root_logger.info('\tPolicy description: ' + origin_policy_version_detail['description'] )
+                root_logger.info('\tType: ' + origin_policy_version_detail['balancingType'])
+                root_logger.info('\tNo of data centers: ' + str( len(origin_policy_version_detail['dataCenters'])) )
+                if origin_policy_version_detail['deleted'] == True:
+                    root_logger.info('\n\tDeleted: True' )
+
+                root_logger.info(
+                    '\nNOTE: You can pass --verbose to get more detailed information about the policy.\n')
+            else:
+                root_logger.info('Fetching policy details for: ' + policy)
+                root_logger.info('\nDetails of version: ' + str(version))
+                root_logger.info('\tPolicy created by: ' + origin_policy_version_detail['lastModifiedBy'])
+                root_logger.info('\tPolicy description: ' + origin_policy_version_detail['description'])
+                root_logger.info('\tType: ' + origin_policy_version_detail['balancingType'])
+                root_logger.info('\tNo of data centers: ' + str(len(origin_policy_version_detail['dataCenters'])))
+                if origin_policy_version_detail['deleted'] == True:
+                    root_logger.info('\n\tDeleted: True')
+
+                #root_logger.info('\tData Center Details: ')
+                #root_logger.info('\t-------------------- ')
+
+                for every_data_center in origin_policy_version_detail['dataCenters']:
+                    root_logger.info('\n\t\tData Center ID: ' + every_data_center['originId'])
+                    root_logger.info('\t\t================================================')
+                    root_logger.info('\n\t\tHostName\tWeight\tCloud Service')
+                    root_logger.info('\t\t' +every_data_center['hostname']+'\t'+str(every_data_center['percent'])+'\t'+
+                                     str(every_data_center['cloudService']))
+                    root_logger.info('\n\t\tCity\tState\tCountry\tLat\tLong')
+                    root_logger.info('\t\t'+cleanup(every_data_center,'city') +'\t'+ cleanup(every_data_center,'stateOrProvince')
+                                     +'\t'+cleanup(every_data_center,'country') + '\t' + cleanup(every_data_center,'latitude')
+                                     +'\t'+cleanup(every_data_center,'longitude') )
+    else:
+        root_logger.info(
+            '\nLocal datastore does not have this policy. Please double check policy name or run "setup" first')
+        exit(1)
+
+
+def cleanup(someValue, key):
+    response = 'NA'
+    if key in someValue:
+        response = someValue[key]
+    return str(response)
 
 
 

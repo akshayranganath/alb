@@ -302,7 +302,7 @@ class Cloudlet(object):
         cloudlet_origin_response = session.get(cloudlet_origin_url)
         return cloudlet_origin_response
 
-    def get_cloudlet_origin_versions(self, session, origin_id):
+    def get_cloudlet_origin_version(self, session, origin_id, version):
         """
 
         :param session: Object
@@ -314,6 +314,18 @@ class Cloudlet(object):
              (cloudlet_origin_response) Object with all details
         """
         cloudlet_policy_url = 'https://' + self.access_hostname + '/cloudlets/api/v2/origins/' + \
-                              str(origin_id) + '/versions/'
+                              str(origin_id) + '/versions/' + version
+        cloudlet_policy_response = session.get(cloudlet_policy_url)
+        return cloudlet_policy_response
+
+    def list_origin_policy_activiations(self, session, origin_id):
+        """
+
+        :param session:
+        :param origin_id:
+        :return:
+        """
+        cloudlet_policy_url = 'https://' + self.access_hostname + '/cloudlets/api/v2/origins/' + \
+                              str(origin_id) + '/activations/'
         cloudlet_policy_response = session.get(cloudlet_policy_url)
         return cloudlet_policy_response
