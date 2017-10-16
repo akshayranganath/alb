@@ -596,7 +596,7 @@ def cleanup(someValue, key):
     response = ''
     if key in someValue:
         response = someValue[key]
-    return str(response)
+    return response
 
 
 
@@ -700,10 +700,16 @@ def download_cloudlet_origin(base_url, session, policy, version, output_file, cl
 
                 policy_details_to_file['description'] = cleanup( every_detail_of_policy, 'description' )
                 policy_details_to_file['deleted'] = cleanup( every_detail_of_policy,'deleted' )
+                policy_details_to_file['version'] = cleanup( every_detail_of_policy,'version' )
                 policy_details_to_file['immutable'] = cleanup( every_detail_of_policy, 'immutable' )
                 policy_details_to_file['balancingType'] = cleanup(every_detail_of_policy, 'balancingType')
                 policy_details_to_file['originId'] = cleanup(every_detail_of_policy, 'originId')
-                policy_details_to_file['dataCenters'] = cleanup(every_detail_of_policy, 'dataCenters')
+                if 'dataCenters' in every_detail_of_policy:
+                    policy_details_to_file['dataCenters'] = cleanup(every_detail_of_policy, 'dataCenters')
+                if 'livenessSettings' in  every_detail_of_policy:
+                    policy_details_to_file['livenessSettings'] = cleanup(every_detail_of_policy, 'livenessSettings')
+
+                root_logger.info(json.dumps(policy_details_to_file, indent=4))
 
                 with open(output_filename, mode='w') as policy_file_handler:
                     policy_file_handler.write(json.dumps(
@@ -739,6 +745,13 @@ def create_version(args):
     file = args.file
 
     cloudlet_object = Cloudlet(base_url)
+
+    if args.show_origin_policy == False:
+        create_cloudlet_version(base_url, session, policy, file, cloudlet_object)
+    else:
+        create_cloudlet_origin_version(base_url, session, policy, file, cloudlet_object)
+
+def create_cloudlet_version(base_url, session, policy, file, cloudlet_object):
     policies_folder = os.path.join(get_cache_dir(), 'policies')
     for root, dirs, files in os.walk(policies_folder):
         local_policy_file = policy + '.json'
@@ -804,6 +817,67 @@ def create_version(args):
 
     return 0
 
+def create_cloudlet_origin_version(base_url, session, policy, file, cloudlet_object):
+    policies_folder = os.path.join(get_cache_dir(), 'origins')
+    for root, dirs, files in os.walk(policies_folder):
+        local_policy_file = policy + '.json'
+        if local_policy_file in files:
+            root_logger.info(
+                'Found policy: ' +
+                policy +
+                ' and using policyId from local store...')
+            policy_policy_id = policy
+
+            new_policy_folder = 'rules'
+            new_policy_file = policy + '_rules.json'
+            if file:
+                custom_file = file
+                rules_file = os.path.join(new_policy_folder, custom_file)
+            else:
+                root_logger.info(
+                    '\n--file option was not specified. Picking rules file from: ' +
+                    os.path.join(
+                        new_policy_folder,
+                        new_policy_file))
+                rules_file = os.path.join(new_policy_folder, new_policy_file)
+
+            try:
+                with open(rules_file, mode='r') as policy_data:
+                    policy_details = json.load(policy_data)
+                    policy_details_json = json.dumps(policy_details)
+                root_logger.info(
+                    'Trying to create a new version of this policy...')
+                policy_create_response = cloudlet_object.create_origin_policy_version(
+                    session, policy_id=policy_policy_id, policy_details=policy_details_json)
+
+                new_version = policy_create_response.json()['version']
+
+                if policy_create_response.status_code == 201:
+                    root_logger.info(
+                        'Success! Created policy version number ' + str(
+                            new_version))
+                else:
+                    root_logger.info(
+                        'Cannot create new policy version, Reason: ' +
+                        policy_create_response.json()['detail'])
+                    root_logger.debug(
+                        'Detailed Json response is: ' +
+                        policy_create_response.json())
+
+            except FileNotFoundError:
+                root_logger.info(
+                    '\n' +
+                    os.path.join(
+                        new_policy_folder,
+                        new_policy_file) +
+                    ' is not found. This file is the default source for uploading rules.\n')
+                root_logger.info(
+                    'You may want to use "download <policyname>" first\n')
+        else:
+            root_logger.info(
+                '\nLocal datastore does not have this policy. Please double check policy name or run "setup" first')
+
+    return 0
 
 def activate(args):
     base_url, session = init_config(args.edgerc, args.section)

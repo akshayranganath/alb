@@ -206,6 +206,39 @@ class Cloudlet(object):
             cloudlet_policy_create_url, headers=headers)
         return cloudlet_policy_create_response
 
+    def create_origin_policy_version(
+            self,
+            session,
+            policy_id,
+            policy_details,
+            clone_version='optional'):
+        """
+        Function to create an origin policy version
+
+        Parameters
+        -----------
+        session : <string>
+            An EdgeGrid Auth akamai session object
+
+        Returns
+        -------
+        cloudlet_policy_create_response : cloudlet_policy_create_response
+            Json object details of created cloudlet policy version
+        """
+        headers = {
+            "Content-Type": "application/json"
+        }
+        if clone_version == 'optional':
+            cloudlet_policy_create_url = 'https://' + self.access_hostname + \
+                                         '/cloudlets/api/v2/origins/' + policy_id + '/versions'
+        else:
+            cloudlet_policy_create_url = 'https://' + self.access_hostname + '/cloudlets/api/v2/policies/' + \
+                                         policy_id + '/versions' + '?cloneVersion=' + clone_version
+        print ('Using URL: ' + cloudlet_policy_create_url )
+        cloudlet_policy_create_response = session.post(
+            cloudlet_policy_create_url, headers=headers, data=policy_details)
+        return cloudlet_policy_create_response
+
     def update_policy_version(
             self,
             session,
@@ -230,6 +263,34 @@ class Cloudlet(object):
         }
         cloudlet_policy_update_url = 'https://' + self.access_hostname + '/cloudlets/api/v2/policies/' + \
                                      str(policy_id) + '/versions/' + str(version) + '?omitRules=false'
+        cloudlet_policy_update_response = session.put(
+            cloudlet_policy_update_url, data=policy_details, headers=headers)
+        return cloudlet_policy_update_response
+
+    def update_origin_policy_version(
+            self,
+            session,
+            policy_id,
+            policy_details,
+            version):
+        """
+        Function to update a policy version
+
+        Parameters
+        -----------
+        session : <string>
+            An EdgeGrid Auth akamai session object
+
+        Returns
+        -------
+        cloudlet_policy_update_response : cloudlet_policy_update_response
+            Json object details of updated cloudlet policy version
+        """
+        headers = {
+            "Content-Type": "application/json"
+        }
+        cloudlet_policy_update_url = 'https://' + self.access_hostname + \
+                                         '/cloudlets/api/v2/origins/' + policy_id + '/versions' + str(version) + '?omitRules=false'
         cloudlet_policy_update_response = session.put(
             cloudlet_policy_update_url, data=policy_details, headers=headers)
         return cloudlet_policy_update_response
