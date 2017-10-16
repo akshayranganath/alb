@@ -608,7 +608,7 @@ def show_origin_details(base_url, session, policy, version, verbose, from_versio
 
 
 def cleanup(someValue, key):
-    response = 'NA'
+    response = ''
     if key in someValue:
         response = someValue[key]
     return str(response)
@@ -623,6 +623,12 @@ def download(args):
     output_file = args.output_file
 
     cloudlet_object = Cloudlet(base_url)
+    if args.show_origin_policy == False:
+        download_cloudlet(base_url, session, policy, version, output_file, cloudlet_object)
+    else:
+        download_cloudlet_origin(base_url, session, policy, version, output_file, cloudlet_object)
+
+def download_cloudlet(base_url, session, policy, version, output_file, cloudlet_object):
     policies_folder = os.path.join(get_cache_dir(), 'policies')
     for root, dirs, files in os.walk(policies_folder):
         local_policy_file = policy + '.json'
@@ -638,6 +644,8 @@ def download(args):
                 # Update the local copy to latest details
                 new_policy_folder = 'rules'
                 if output_file:
+                    if not os.path.exists(new_policy_folder):
+                        os.makedirs(new_policy_folder)
                     output_filename = os.path.join(
                         new_policy_folder, output_file)
                 else:
@@ -678,6 +686,56 @@ def download(args):
 
     return 0
 
+def download_cloudlet_origin(base_url, session, policy, version, output_file, cloudlet_object):
+    policies_folder = os.path.join(get_cache_dir(), 'origins')
+    for root, dirs, files in os.walk(policies_folder):
+        local_policy_file = policy + '.json'
+        #we only need to check if the policy file eists. There is no nothing to be read from this.
+        if local_policy_file in files:
+            root_logger.info('\nFetching policy rule details...')
+            policy_details = cloudlet_object.get_cloudlet_origin_version(
+                session, policy, version=version)
+
+            if policy_details.status_code == 200:
+                # Update the local copy to latest details
+                new_policy_folder = 'rules'
+                if output_file:
+                    if not os.path.exists(new_policy_folder):
+                        os.makedirs(new_policy_folder)
+                    output_filename = os.path.join(
+                        new_policy_folder, output_file)
+                else:
+                    if not os.path.exists(new_policy_folder):
+                        os.makedirs(new_policy_folder)
+                    new_policy_file = policy + '_rules.json'
+                    output_filename = os.path.join(
+                        new_policy_folder, new_policy_file)
+                policy_details_to_file = {}
+                every_detail_of_policy = policy_details.json()
+
+                policy_details_to_file['description'] = cleanup( every_detail_of_policy, 'description' )
+                policy_details_to_file['deleted'] = cleanup( every_detail_of_policy,'deleted' )
+                policy_details_to_file['immutable'] = cleanup( every_detail_of_policy, 'immutable' )
+                policy_details_to_file['balancingType'] = cleanup(every_detail_of_policy, 'balancingType')
+                policy_details_to_file['originId'] = cleanup(every_detail_of_policy, 'originId')
+                policy_details_to_file['dataCenters'] = cleanup(every_detail_of_policy, 'dataCenters')
+
+                with open(output_filename, mode='w') as policy_file_handler:
+                    policy_file_handler.write(json.dumps(
+                        policy_details_to_file, indent=4))
+                root_logger.info(
+                    '\nGenerated policy rule details in json format. File output location is: ' +
+                    output_filename)
+            else:
+                root_logger.info(
+                    'Unable to fetch version details. Check the version number')
+                return 1
+        else:
+            root_logger.info(
+                '\nLocal datastore does not have this policy. Please double check policy name or run "setup" first')
+            return 1
+
+    return 0
 
 def create_version(args):
     base_url, session = init_config(args.edgerc, args.section)
