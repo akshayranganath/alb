@@ -235,7 +235,7 @@ def create_sub_command(
         action="store_true")
 
     optional.add_argument(
-        "--show_origin_policy",
+        "--origin_policy",
         help="Instead of showing cloudlet policy, show the origin policy",
         action="store_true"
     )
@@ -342,9 +342,7 @@ def show(args):
     verbose = args.verbose
     from_version = args.from_version
     # new parameter to switch to origin policy
-    show_origin_policy = args.show_origin_policy
-
-    if show_origin_policy == True:
+    if args.origin_policy == True:
         show_origin_details(base_url, session, policy, version, verbose, from_version)
     else:
         show_policy_details(base_url, session, policy, version, verbose, from_version)
@@ -608,7 +606,7 @@ def download(args):
     output_file = args.output_file
 
     cloudlet_object = Cloudlet(base_url)
-    if args.show_origin_policy == False:
+    if args.origin_policy == False:
         download_cloudlet(base_url, session, policy, version, output_file, cloudlet_object)
     else:
         download_cloudlet_origin(base_url, session, policy, version, output_file, cloudlet_object)
@@ -746,7 +744,7 @@ def create_version(args):
 
     cloudlet_object = Cloudlet(base_url)
 
-    if args.show_origin_policy == False:
+    if args.origin_policy == False:
         create_cloudlet_version(base_url, session, policy, file, cloudlet_object)
     else:
         create_cloudlet_origin_version(base_url, session, policy, file, cloudlet_object)
@@ -893,7 +891,7 @@ def activate(args):
 
     cloudlet_object = Cloudlet(base_url)
 
-    if args.show_origin_policy==False:
+    if args.origin_policy==False:
         return activate_policy(base_url, session, policy, version, network, cloudlet_object)
     else:
         return activate_origin_policy(base_url, session, policy, version, network, cloudlet_object)
