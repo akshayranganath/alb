@@ -327,6 +327,37 @@ class Cloudlet(object):
             cloudlet_policy_activate_url, data=network_data, headers=headers)
         return cloudlet_policy_activate_response
 
+    def activate_origin_policy_version(
+            self,
+            session,
+            origin_policy_id,
+            version,
+            network='staging'):
+        """
+        Function to activate a policy version
+
+        Parameters
+        -----------
+        session : <string>
+            An EdgeGrid Auth akamai session object
+
+        Returns
+        -------
+        cloudlet_policy_activate_response : cloudlet_policy_activate_response
+            Json object details of activated cloudlet policy version
+        """
+        headers = {
+            "Content-Type": "application/json"
+        }
+        network_data = {"dryrun": False,"network": network.upper(),"originId" : origin_policy_id,"version": int(version)}
+        # now convert it to a string format
+        network_data = json.dumps(network_data, indent=4)
+        cloudlet_policy_activate_url = 'https://' + self.access_hostname + \
+                                       '/cloudlets/api/v2/origins/' + origin_policy_id + '/activations'
+        cloudlet_policy_activate_response = session.post(
+            cloudlet_policy_activate_url, data=network_data, headers=headers)
+        return cloudlet_policy_activate_response
+
     def delete_policy_version(self, session, policy_id, version):
         """
         Function to delete a policy version

@@ -583,9 +583,9 @@ def show_origin_details(base_url, session, policy, version, verbose, from_versio
                     root_logger.info('\t\t' +every_data_center['hostname']+'\t'+str(every_data_center['percent'])+'\t'+
                                      str(every_data_center['cloudService']))
                     root_logger.info('\n\t\tCity\tState\tCountry\tLat\tLong')
-                    root_logger.info('\t\t'+cleanup(every_data_center,'city') +'\t'+ cleanup(every_data_center,'stateOrProvince')
-                                     +'\t'+cleanup(every_data_center,'country') + '\t' + cleanup(every_data_center,'latitude')
-                                     +'\t'+cleanup(every_data_center,'longitude') )
+                    root_logger.info('\t\t'+cleanup(every_data_center,'city') +'\t'+  cleanup(every_data_center,'stateOrProvince')
+                                     +'\t'+cleanup(every_data_center,'country') + '\t' + str( cleanup(every_data_center,'latitude') )
+                                     +'\t'+ str( cleanup(every_data_center,'longitude')) )
     else:
         root_logger.info(
             '\nLocal datastore does not have this policy. Please double check policy name or run "setup" first')
@@ -753,8 +753,10 @@ def create_version(args):
 
 def create_cloudlet_version(base_url, session, policy, file, cloudlet_object):
     policies_folder = os.path.join(get_cache_dir(), 'policies')
+
     for root, dirs, files in os.walk(policies_folder):
         local_policy_file = policy + '.json'
+        root_logger.info('Looking for policy file: ' + local_policy_file)
         if local_policy_file in files:
             root_logger.info(
                 'Found policy: ' +
@@ -890,6 +892,14 @@ def activate(args):
         network = 'prod'
 
     cloudlet_object = Cloudlet(base_url)
+
+    if args.show_origin_policy==False:
+        return activate_policy(base_url, session, policy, version, network, cloudlet_object)
+    else:
+        return activate_origin_policy(base_url, session, policy, version, network, cloudlet_object)
+
+
+def activate_policy(base_url, session, policy, version, network, cloudlet_object):
     policies_folder = os.path.join(get_cache_dir(), 'policies')
     for root, dirs, files in os.walk(policies_folder):
         local_policy_file = policy + '.json'
@@ -919,6 +929,42 @@ def activate(args):
             else:
                 root_logger.info(
                     'Unable to activate, check the version number.')
+                return 1
+        else:
+            root_logger.info(
+                '\nLocal datastore does not have this policy. Please double check policy name or run "setup" first')
+            return 1
+
+    return 0
+
+def activate_origin_policy(base_url, session, policy, version, network, cloudlet_object):
+    policies_folder = os.path.join(get_cache_dir(), 'origins')
+    for root, dirs, files in os.walk(policies_folder):
+        local_policy_file = policy + '.json'
+        if local_policy_file in files:
+            root_logger.info(
+                policy +
+                ' file is Found... Using policyId from local store...')
+            # we don't need to open the file
+
+            # Update the local copy to latest details
+            root_logger.info(
+                'Trying to activate policy ' +
+                policy +
+                ' version ' +
+                version +
+                ' to ' +
+                network +
+                ' network...')
+
+            activation_response = cloudlet_object.activate_origin_policy_version(
+                session, policy, version, network)
+            if activation_response.status_code == 200:
+                root_logger.info('Success! Policy version is activated')
+            else:
+                root_logger.info(
+                    'Unable to activate, check the version number.')
+                root_logger.info(json.dumps(activation_response.json(), indent=4))
                 return 1
         else:
             root_logger.info(
