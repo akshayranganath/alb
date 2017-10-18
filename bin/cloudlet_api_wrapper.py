@@ -16,22 +16,26 @@ import json
 
 
 class Cloudlet(object):
+    """
+        Place holder for all the cloudlet related API calls. The whole class is a wrapper to the API and no
+        real decision logic is executed in this file.
+    """
+
     def __init__(self, access_hostname):
+        """
+
+        :param access_hostname: <string>
+            This is the host filed from the edgerc file
+        """
         self.access_hostname = access_hostname
 
     def list_cloudlet_groups(self, session):
         """
         Function to fetch all groups
-
-        Parameters
-        -----------
-        session : <string>
-            An EdgeGrid Auth akamai session object
-
-        Returns
-        -------
-        cloudlet_group_response : cloudlet_group_response
-            (cloudlet_group_response) Object with all details
+            :param session: <Requests.session>
+                An EdgeGrid Auth akamai session object
+            :return: cloudlet_group_response: <Requests.response>
+                HTTP response for the API call.
         """
         cloudlet_group_url = 'https://' + self.access_hostname + '/cloudlets/api/v2/group-info'
         cloudlet_group_response = session.get(cloudlet_group_url)
@@ -39,17 +43,11 @@ class Cloudlet(object):
 
     def get_all_group_ids(self, session):
         """
-        Function to fetch all groupIDs only
-
-        Parameters
-        -----------
-        session : <string>
-            An EdgeGrid Auth akamai session object
-
-        Returns
-        -------
-        group_id_list : List
-            group_id_list with list of all groupIds
+        Get All group
+            :param session: <Requests.session>
+                An EdgeGrid Auth akamai session object
+            :return: group_id_list: <List>
+                List of group IDs. This will typically be used for finding all the cloudlet policies.
         """
         cloudlet_group_url = 'https://' + self.access_hostname + '/cloudlets/api/v2/group-info'
         cloudlet_group_response = session.get(cloudlet_group_url)
@@ -61,17 +59,12 @@ class Cloudlet(object):
 
     def list_all_cloudlets(self, session):
         """
-        Function to fetch all cloudlets
-
-        Parameters
-        -----------
-        session : <string>
-            An EdgeGrid Auth akamai session object
-
-        Returns
-        -------
-        cloudlet_list : List
-            cloudlet_list with list of all cloudlets
+        List all cloudlets
+            :param session: <Requests.session>
+                An EdgeGrid Auth akamai session object
+            :return: cloudlet_list : <List>
+                This function loops through all the available cloudlets in a group and returns the ALB cloudlets,
+                if present.
         """
         group_id_list = self.get_all_group_ids(session)
         cloudlet_list = []
@@ -101,17 +94,20 @@ class Cloudlet(object):
             cloudlet_id='optional',
             cloudlet_code='optional'):
         """
-        Function to fetch Policies from cloudletId and GroupId
+        List all the available policies for a cloudlet type.
 
-        Parameters
-        -----------
-        session : <string>
-            An EdgeGrid Auth akamai session object
+            :param session: <Requests.session>
+                An EdgeGrid Auth akamai session object
+            :param group_id: <int>
+                groupId field
+            :param cloudlet_id: <int>
+                This is hard coded to be 9. This indicates the ALB cloudlet.
+            :param cloudlet_code: <String> Default - optional
+                For ALB, this is set to "ALB" in the calling function
 
-        Returns
-        -------
-        policies_response : policies_response
-            Policies of cloudlet Id
+            :return: policies_response : <Requests.response>
+                HTTP response for the API call.
+
         """
         policies_response = None
         if cloudlet_code == 'optional':
@@ -127,17 +123,16 @@ class Cloudlet(object):
 
     def get_cloudlet_policy(self, session, policy_id, version='optional'):
         """
-        Function to fetch a cloudlet policy detail
+        Get the details for a cloudlet policy
+            :param session: <Requests.session>
+                An EdgeGrid Auth akamai session object
+            :param policy_id: <int>
+                This will contain the policyId field for a cloudlet or the originId
+            :param version: <int>
+                The version for which we need the details.
 
-        Parameters
-        -----------
-        session : <string>
-            An EdgeGrid Auth akamai session object
-
-        Returns
-        -------
-        cloudlet_policy_response : cloudlet_policy_response
-            Json object details of specific cloudlet policy
+            :return: cloudlet_policy_response: <Requests.response>
+                HTTP response for the API call.
         """
         if version == 'optional':
             cloudlet_policy_url = 'https://' + self.access_hostname + \
@@ -150,17 +145,18 @@ class Cloudlet(object):
 
     def list_policy_versions(self, session, policy_id, page_size='optional'):
         """
-        Function to fetch a cloudlet policy versions
+        List the policy versions for a cloudlet.
 
-        Parameters
-        -----------
-        session : <string>
-            An EdgeGrid Auth akamai session object
+            :param session: <Requests.session>
+                An EdgeGrid Auth akamai session object
+            :param policy_id: <int>
+                This will contain the policyId field for a cloudlet or the originId
+            :param page_size: <String>
+                An optional parameter that specific the number of responses returned.
+                By default, we return everything.
 
-        Returns
-        -------
-        cloudletPolicyResponse : cloudletPolicyResponse
-            Json object details of specific cloudlet policy versions
+            :return:  cloudlet_policy_versions_response : <Requests.response>
+                HTTP response for the API call.
         """
         if page_size == 'optional':
             cloudlet_policy_versions_url = 'https://' + self.access_hostname + \
@@ -179,17 +175,17 @@ class Cloudlet(object):
             policy_id,
             clone_version='optional'):
         """
-        Function to create a policy version
+        Create a new version of the cloudlet or origin policy
+            :param session: <Requests.session>
+                An EdgeGrid Auth akamai session object
+            :param policy_id: <int>
+                This will contain the policyId field for the cloudlet
+            :param clone_version: <int>
+                The version to clone from. This is applicable for cloudlet policy as origin policy does not support
+                cloning functionality.
 
-        Parameters
-        -----------
-        session : <string>
-            An EdgeGrid Auth akamai session object
-
-        Returns
-        -------
-        cloudlet_policy_create_response : cloudlet_policy_create_response
-            Json object details of created cloudlet policy version
+            :return: cloudlet_policy_create_response : : <Requests.response>
+                HTTP response for the API call.
         """
         headers = {
             "Content-Type": "application/json"
@@ -213,17 +209,17 @@ class Cloudlet(object):
             policy_details,
             clone_version='optional'):
         """
-        Function to create an origin policy version
+        Create a new origin policy
+            :param session: <Requests.session>
+                An EdgeGrid Auth akamai session object
+            :param policy_id: <int>
+                This will contain the originId field for the ALB policy
+            :param clone_version: <int>
+                The version to clone from. This is applicable for cloudlet policy as origin policy does not support
+                cloning functionality.
 
-        Parameters
-        -----------
-        session : <string>
-            An EdgeGrid Auth akamai session object
-
-        Returns
-        -------
-        cloudlet_policy_create_response : cloudlet_policy_create_response
-            Json object details of created cloudlet policy version
+            :return: cloudlet_policy_create_response : : <Requests.response>
+                HTTP response for the API call.
         """
         headers = {
             "Content-Type": "application/json"
@@ -246,17 +242,18 @@ class Cloudlet(object):
             policy_details,
             version):
         """
-        Function to update a policy version
+        Update a specific version of the cloudlet policy
+            :param session: <Requests.session>
+                An EdgeGrid Auth akamai session object
+            :param policy_id: <int>
+                This will contain the policyId field for the cloudlet
+            :param policy_details: <JSON>
+                This is the raw JSON to be used for the policy
+            :param version: <int>
+                The version for which we need the details.
 
-        Parameters
-        -----------
-        session : <string>
-            An EdgeGrid Auth akamai session object
-
-        Returns
-        -------
-        cloudlet_policy_update_response : cloudlet_policy_update_response
-            Json object details of updated cloudlet policy version
+            :return: cloudlet_policy_update_response: <Requests.response>
+                HTTP response for the API call.
         """
         headers = {
             "Content-Type": "application/json"
@@ -274,17 +271,18 @@ class Cloudlet(object):
             policy_details,
             version):
         """
-        Function to update a policy version
+        Update a specific version of the cloudlet origin policy
+            :param session: <Requests.session>
+                An EdgeGrid Auth akamai session object
+            :param policy_id: <int>
+                This will contain the originId field for the cloudlet origin
+            :param policy_details: <JSON>
+                This is the raw JSON to be used for the policy
+            :param version: <int>
+                The version for which we need the details.
 
-        Parameters
-        -----------
-        session : <string>
-            An EdgeGrid Auth akamai session object
-
-        Returns
-        -------
-        cloudlet_policy_update_response : cloudlet_policy_update_response
-            Json object details of updated cloudlet policy version
+            :return: cloudlet_policy_update_response: <Requests.response>
+                HTTP response for the API call.
         """
         headers = {
             "Content-Type": "application/json"
@@ -302,17 +300,19 @@ class Cloudlet(object):
             version,
             network='staging'):
         """
-        Function to activate a policy version
+        Activate a specific cloudlet policy version to the Akamai staging or production network
+            :param session: <Requests.session>
+                An EdgeGrid Auth akamai session object
+            :param policy_id: <int>
+                This will contain the cloudletId field for the cloudlet policy
+            :param version: <int>
+                The version for which we need the details.
+            :param network: <String> (staging | production)
+                The nework on which this ocnfiguration needs to be activated.
 
-        Parameters
-        -----------
-        session : <string>
-            An EdgeGrid Auth akamai session object
+            :return: cloudlet_policy_activate_response: <Requests.response>
+                HTTP response for the API call.
 
-        Returns
-        -------
-        cloudlet_policy_activate_response : cloudlet_policy_activate_response
-            Json object details of activated cloudlet policy version
         """
         headers = {
             "Content-Type": "application/json"
@@ -334,17 +334,18 @@ class Cloudlet(object):
             version,
             network='staging'):
         """
-        Function to activate a policy version
+        Activate a specific origin policy version to the Akamai netowork.
+            :param session: <Requests.session>
+                An EdgeGrid Auth akamai session object
+            :param origin_policy_id: <int>
+                This will contain the originId field for the cloudlet origin
+            :param version: <int>
+                The version for which we need the details.
+            :param network: <String> (staging | production)
+                The nework on which this ocnfiguration needs to be activated.
 
-        Parameters
-        -----------
-        session : <string>
-            An EdgeGrid Auth akamai session object
-
-        Returns
-        -------
-        cloudlet_policy_activate_response : cloudlet_policy_activate_response
-            Json object details of activated cloudlet policy version
+            :return: cloudlet_policy_activate_response: <Requests.response>
+                HTTP response for the API call.
         """
         headers = {
             "Content-Type": "application/json"
@@ -358,19 +359,23 @@ class Cloudlet(object):
             cloudlet_policy_activate_url, data=network_data, headers=headers)
         return cloudlet_policy_activate_response
 
-    def delete_policy_version(self, session, policy_id, version):
+    def delete_policy_version(
+            self,
+            session,
+            policy_id,
+            version
+    ):
         """
-        Function to delete a policy version
+        Delete a policy version
+            :param session: <Requests.session>
+                An EdgeGrid Auth akamai session object
+            :param policy_id: <int>
+                This will contain the cloudletId field for the cloudlet policy
+            :param version: <int>
+                The version for which we need the details.
 
-        Parameters
-        -----------
-        session : <string>
-            An EdgeGrid Auth akamai session object
-
-        Returns
-        -------
-        cloudlet_policy_delete_response : cloudlet_policy_delete_response
-            Json object details of deleted cloudlet policy version
+            :return: cloudlet_policy_delete_response : <Requests.response>
+                HTTP response for the API call.
         """
 
         cloudlet_policy_delete_url = 'https://' + self.access_hostname + \
@@ -381,41 +386,54 @@ class Cloudlet(object):
 
     def list_origins(self, session):
         """
-        Function to fetch all the ALB cloudlets
+        List all the origins
+            :param session: <Requests.session>
+                An EdgeGrid Auth akamai session object
 
-        :param session: <string>
-            An EdgeGrid Auth akamai session object
-
-        :return: cloudlet_origin_response : Object
-            (cloudlet_origin_response) Object with all details
-
+            :return: cloudlet_origin_response : <Requests.response>
+                HTTP response for the API call.
         """
         cloudlet_origin_url = 'https://' + self.access_hostname + '/cloudlets/api/v2/origins?type=APPLICATION_LOAD_BALANCER'
         cloudlet_origin_response = session.get(cloudlet_origin_url)
         return cloudlet_origin_response
 
-    def get_cloudlet_origin_version(self, session, origin_id, version):
+    def get_cloudlet_origin_version(
+            self,
+            session,
+            origin_id,
+            version
+    ):
         """
+        Get a cloudlet origin version.
+            :param session: <Requests.session>
+                An EdgeGrid Auth akamai session object
+            :param origin_id: <int>
+                The originId for the clouldlet origin policy
+            :param version: <int>
+                The version for which we need the details.
 
-        :param session: Object
-             An EdgeGrid Auth akamai session object
-        :param origin_id: String
-             The origin id for the Cloudlet policies
-
-        :return: cloudlet_origin_response : Object
-             (cloudlet_origin_response) Object with all details
+            :return: cloudlet_policy_response : <Requests.response>
+                HTTP response for the API call.
         """
         cloudlet_policy_url = 'https://' + self.access_hostname + '/cloudlets/api/v2/origins/' + \
                               str(origin_id) + '/versions/' + version
         cloudlet_policy_response = session.get(cloudlet_policy_url)
         return cloudlet_policy_response
 
-    def list_origin_policy_activiations(self, session, origin_id):
+    def list_origin_policy_activiations(
+            self,
+            session,
+            origin_id
+    ):
         """
+        List all the origin policy activations
+            :param session: <Requests.session>
+                An EdgeGrid Auth akamai session object
+            :param origin_id: <int>
+                The originId for the clouldlet origin policy
 
-        :param session:
-        :param origin_id:
-        :return:
+            :return: cloudlet_policy_response : <Requests.response>
+                HTTP response for the API call.
         """
         cloudlet_policy_url = 'https://' + self.access_hostname + '/cloudlets/api/v2/origins/' + \
                               str(origin_id) + '/activations/'
