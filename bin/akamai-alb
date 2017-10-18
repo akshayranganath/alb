@@ -25,9 +25,10 @@ from cloudlet_api_wrapper import Cloudlet
 
 
 """
-This code leverages Akamai OPEN API. to control Visitor Prioritization cloudlets.
-In case you need quick explanation contact the initiators.
-Initiators: vbhat@akamai.com and aetsai@akamai.com
+This code leverages Akamai OPEN API. to control ALB cloudlets.
+In case you need quick explanation contact the initiators or 
+post your question at the Akamai community: 
+https://community.akamai.com/community/web-performance/cloudlets
 """
 
 PACKAGE_VERSION = "0.1.0"
@@ -974,7 +975,10 @@ def activate_origin_policy(base_url, session, policy, version, network, cloudlet
 
 def list(args=None):
     counter = 1
-    policies_folder = os.path.join(get_cache_dir(), 'policies')
+    if args.origin_policy == False:
+        policies_folder = os.path.join(get_cache_dir(), 'policies')
+    else:
+        policies_folder = os.path.join(get_cache_dir(), 'origins')
 
     root_logger.info('\n\nAvailable policies are: ')
     root_logger.info('--------------------------\n')
