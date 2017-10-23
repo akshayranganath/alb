@@ -51,18 +51,20 @@ Main program that wraps this functionality in a command line utility:
 * [create-version](#create-version)
 
 ### setup
-Does a one time download of Visitor Prioritization Cloudlet policyIds and groupIds and stores them in /setup folder for faster local retrieval. This command can be run anytime and will refresh the /setup folder based on the current list of policies. 
+Does a one time download of Application Load Balancer (ALB) Cloudlet policyIds, origin policies ids and groupIds and stores them in /setup folder for faster local retrieval. This command can be run anytime and will refresh the /setup folder based on the current list of policies. 
 
 ```bash
 %  akamai-alb setup
 ```
 
 ### list
-List current Visitor Prioritization Cloudlet policy names  
+List current ALB Cloudlet policy  or ALB Cloudlet Origin policy names  
 
 ```bash
 %  akamai-alb list
 ```
+
+Use the optional parameter ```--origin_policy``` to see the ALB origin configuration details.
 
 ### show
 Get specific details for a policy name. Available information include configurations that reference that policy, current version numbers on Akamai staging and production, version history, and current rule settings.
@@ -77,13 +79,13 @@ Get specific details for a policy name. Available information include configurat
 The flags of interest for show are:
 
 ```
---policy <policyName>        Specified Visitor Prioritization Cloudlet policy name
+--policy <policyName>        Specified ALB Cloudlet / ALB Oriign policy name
 --version <version>          Specific version number for that policy name (optional)
 --from-version <fromVersion> If --version is not specified, list policy version details starting from --from-version value (optional)
 --verbose                    If --version is specified, add --verbose to get full rule details including url paths and match criteria (optional)
 ```
 
-Use the optional parameter ```--origin_policy`` to see the ALB origin configuration details.
+Use the optional parameter ```--origin_policy``` to see the ALB origin configuration details.
 
 ### activate
 Activate a specified version for a policy to the appropriate network (staging or production)
@@ -96,13 +98,13 @@ Activate a specified version for a policy to the appropriate network (staging or
 The flags of interest for activate are:
 
 ```
---policy <policyName>   Specified Visitor Prioritization Cloudlet policy name
+--policy <policyName>   Specified ALB Cloudlet / ALB Oriign policy name
 --version <version>     Specific version number for that policy name
 --network <network>     Either staging or production
 
 ```
 
-Use the optional parameter ```--origin_policy`` to see the ALB origin configuration details.
+Use the optional parameter ```--origin_policy``` to see the ALB origin configuration details.
 
 
 ### download
@@ -116,13 +118,13 @@ Download the raw policy rules for a specified version in json format for local e
 The flags of interest for download are:
 
 ```
---policy <policyName>     Specified Visitor Prioritization Cloudlet policy name
+--policy <policyName>     Specified ALB Cloudlet / ALB Oriign policy name
 --version <version>       Specific version number for that policy name
 --output-file <filename>  Filename to be saved in /rules folder (optional) 
 
 ```
 
-Use the optional parameter ```--origin_policy`` to see the ALB origin configuration details.
+Use the optional parameter ```--origin_policy``` to see the ALB origin configuration details.
 
 
 ### create-version
@@ -137,9 +139,9 @@ Create a new policy version from a raw json file
 The flags of interest for create-version are:
 
 ```
---policy <policyName>  Specified Visitor Prioritization Cloudlet policy name
+--policy <policyName>  Specified ALB Cloudlet / ALB Oriign policy name
 --file <file>	         Filename of raw .json file to be used as policy details. This file should be in the /rules folder (optional)
 --force                Use this flag if you want to proceed without confirmation if description field in json has not been updated
 ```
 
-Use the optional parameter ```--origin_policy`` to see the ALB origin configuration details.
+Use the optional parameter ```--origin_policy``` to see the ALB origin configuration details.

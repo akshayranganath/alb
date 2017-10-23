@@ -381,26 +381,27 @@ def show_policy_details(base_url, session, policy, version, verbose, from_versio
                                 for every_match_rule in every_version_detail['matchRules']:
                                     root_logger.info(every_match_rule['name'] + ' -> ')
                                     matches = 0
-                                    for every_match_in_match_rule in every_match_rule['matches']:
-                                        # Loop each match condition within each rule
-                                        # Check whether rules is disabled, if yes
-                                        # display accordingly
-                                        if 'disabled' in every_match_rule and every_match_rule['disabled'] is True:
-                                            status = 'DISABLED'
-                                        else:
-                                            status = 'ACTIVE'
-                                        match_operator = ''
-                                        if every_match_in_match_rule['negate'] != False:
-                                            match_operator = 'not '
-                                        if matches == 1:
-                                            root_logger.info('   AND   ' )
-                                        root_logger.info('   ' +
-                                              every_match_in_match_rule['matchType'] +
-                                              ' -> ' +
-                                             match_operator + every_match_in_match_rule['matchOperator'] +
-                                              ' -> ' +
-                                              every_match_in_match_rule['matchValue'])
-                                        matches = 1
+                                    if 'matches' in every_match_rule:
+                                        for every_match_in_match_rule in every_match_rule['matches']:
+                                            # Loop each match condition within each rule
+                                            # Check whether rules is disabled, if yes
+                                            # display accordingly
+                                            if 'disabled' in every_match_rule and every_match_rule['disabled'] is True:
+                                                status = 'DISABLED'
+                                            else:
+                                                status = 'ACTIVE'
+                                            match_operator = ''
+                                            if every_match_in_match_rule['negate'] != False:
+                                                match_operator = 'not '
+                                            if matches == 1:
+                                                root_logger.info('   AND   ' )
+                                            root_logger.info('   ' +
+                                                  every_match_in_match_rule['matchType'] +
+                                                  ' -> ' +
+                                                 match_operator + every_match_in_match_rule['matchOperator'] +
+                                                  ' -> ' +
+                                                  every_match_in_match_rule['matchValue'])
+                                            matches = 1
 
                                     root_logger.info(' Origin policy: ' +  every_match_rule['forwardSettings']['originId'] )
                                     root_logger.info(
