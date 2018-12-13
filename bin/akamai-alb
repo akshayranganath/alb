@@ -1020,7 +1020,7 @@ def confirm_setup(args):
 def get_prog_name():
     prog = os.path.basename(sys.argv[0])
     if os.getenv("AKAMAI_CLI"):
-        prog = "akamai visitor-prioritization"
+        prog = "akamai alb"
     return prog
 
 

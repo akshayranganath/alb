@@ -41,7 +41,7 @@ The initial version of the CLI provides the following functionality:
 
 Except for the one-time setup, each of the other functionalities can be invoked either for the ALB cloudlet or for the ALB origin configuration.
  
-## cli-cloudlet-visitor-prioritization
+## cli-alb
 Main program that wraps this functionality in a command line utility:
 * [setup](#setup)
 * [list](#list)
